@@ -1,27 +1,14 @@
 import React from 'react';
-import { Bot, User, Wrench } from 'lucide-react';
+import { Bot, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { cn } from '@/lib/utils';
 import type { Message } from '../../worker/types';
-import { Badge } from '@/components/ui/badge';
-import { renderToolCall } from '@/lib/chat';
+import { CodeBlock } from './CodeBlock';
+import { ToolCallResult } from './ToolCallResult';
 interface ChatMessageProps {
   message: Message;
 }
-const CodeBlock = React.memo(({ language, value }: { language: string; value: string }) => {
-  return (
-    <SyntaxHighlighter
-      style={vscDarkPlus}
-      language={language}
-      PreTag="div"
-    >
-      {String(value).replace(/\n$/, '')}
-    </SyntaxHighlighter>
-  );
-});
 export function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === 'user';
   return (
@@ -44,7 +31,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
             : 'rounded-bl-none bg-muted'
         )}
       >
-        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-pre:my-2 prose-pre:p-0 prose-pre:bg-transparent">
+        {message.toolCalls && message.toolCalls.length > 0 && (
+          <div className="mt-1 border-b border-border/50 pb-3 mb-2">
+            {message.toolCalls.map((tool, index) => (
+              <ToolCallResult key={index} toolCall={tool} />
+            ))}
+          </div>
+        )}
+        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-pre:my-0 prose-pre:p-0 prose-pre:bg-transparent">
           <ReactMarkdown
             components={{
               code({ node, className, children, ...props }) {
@@ -62,21 +56,6 @@ export function ChatMessage({ message }: ChatMessageProps) {
             {message.content}
           </ReactMarkdown>
         </div>
-        {message.toolCalls && message.toolCalls.length > 0 && (
-          <div className="mt-3 border-t border-border/50 pt-3">
-            <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
-              <Wrench className="h-3 w-3" />
-              <span>Tools used:</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {message.toolCalls.map((tool, index) => (
-                <Badge key={index} variant="secondary" className="text-xs">
-                  {renderToolCall(tool)}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
       {isUser && (
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground">

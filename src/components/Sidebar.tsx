@@ -1,4 +1,4 @@
-import { Plus, MessageSquare, Settings, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Plus, MessageSquare, Settings, MoreHorizontal, Trash2, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -11,6 +11,7 @@ import { useChatStore } from '@/hooks/useChatStore';
 import { useShallow } from 'zustand/react/shallow';
 import { cn } from '@/lib/utils';
 import { SettingsDialog } from './SettingsDialog';
+import { RenameSessionDialog } from './RenameSessionDialog';
 export function Sidebar() {
   const { sessions, activeSessionId, createNewSession, setActiveSessionId, deleteSession } = useChatStore(
     useShallow((state) => ({
@@ -61,6 +62,12 @@ export function Sidebar() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      <RenameSessionDialog sessionId={session.id} currentTitle={session.title}>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Rename
+                        </DropdownMenuItem>
+                      </RenameSessionDialog>
                       <DropdownMenuItem
                         className="text-red-500"
                         onClick={(e) => {
@@ -79,7 +86,8 @@ export function Sidebar() {
           </div>
         </ScrollArea>
       </div>
-      <footer className="mt-auto flex items-center justify-end border-t p-4">
+      <footer className="mt-auto flex items-center justify-between border-t p-4">
+        <span className="text-xs text-muted-foreground">Built with ���️ at Cloudflare</span>
         <SettingsDialog>
           <Button variant="ghost" size="icon" className="transition-transform hover:scale-110">
             <Settings className="h-5 w-5" />
